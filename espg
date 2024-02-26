@@ -1,0 +1,54 @@
+#!/bin/bash
+
+generate_password() {
+    local length=$1
+    local -a special_chars=('!' '@' '#' '$' '%' '^' '&' '*' '(' ')' '-' '+' '=')
+
+    # Split the password length into parts
+    local part_length=$((length / 4))
+    local special_length=$((length - 3 * part_length))
+
+    # Generate password segments
+    local nums=$(LC_ALL=C tr -dc '0-9' < /dev/urandom | head -c $part_length)
+    local lowers=$(LC_ALL=C tr -dc 'a-z' < /dev/urandom | head -c $part_length)
+    local uppers=$(LC_ALL=C tr -dc 'A-Z' < /dev/urandom | head -c $part_length)
+    local specials=$(for i in $(seq 1 $special_length); do echo -n "${special_chars[$RANDOM % ${#special_chars[@]}]}"; done)
+
+    # Combine and shuffle
+    local password=$(echo -n "$nums$lowers$uppers$specials" | fold -w1 | shuf | tr -d '\n')
+    echo "$password"
+}
+
+copy_to_clipboard() {
+    local password="$1"
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        echo -n "$password" | xclip -selection clipboard
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        echo -n "$password" | pbcopy
+    else
+        echo "Clipboard functionality not supported on this OS. Password is: $password"
+    fi
+}
+
+echo
+echo "-= Enhanced Secure Password Generator =-"
+read -p "How many characters should the password be? [8-64]: " chars
+
+# Validate input
+if ! [[ $chars =~ ^[0-9]+$ ]]; then
+    echo "Error: Your input must be an integer." >&2
+    exit 1
+elif [[ $chars -lt 8 || $chars -gt 64 ]]; then
+    echo "Error: Password length must be between 8 and 64 characters." >&2
+    exit 1
+fi
+
+# Generate and handle the password
+password=$(generate_password "$chars")
+echo "The generated password has been copied to the clipboard."
+copy_to_clipboard "$password"
+
+# Hash the password, trim the output, and display the hash
+hashed_password=$(echo -n "$password" | openssl dgst -sha512 | awk '{print $2}')
+echo "Hashed Password (SHA-512): $hashed_password"
+
