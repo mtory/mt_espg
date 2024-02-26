@@ -1,4 +1,4 @@
-# Enhanced Secure Password Generator
+# Enhanced Secure Password Generator (espg)
 
 This script generates a secure password with a mix of numbers, lowercase and uppercase letters, and special characters, ensuring strong password security. It is designed to work on both macOS and Linux, automatically detecting the operating system to use the appropriate clipboard command and character shuffle utility.
 
@@ -57,12 +57,12 @@ brew install coreutils
 
 1. Make the script executable:
    ```bash
-   chmod +x enhanced_secure_password_generator.sh
+   chmod +x espg
    ```
 
 2. Run the script and follow the prompts:
    ```bash
-   ./enhanced_secure_password_generator.sh
+   ./espg
    ```
 
 The script will ask for the desired password length, generate the password, copy it to your clipboard, and display the SHA-512 hash for verification.
